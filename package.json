@@ -12,6 +12,7 @@
     "@tanstack/react-query": "^5.90.21",
     "bun-plugin-tailwind": "^0.1.2",
     "daisyui": "^5.5.19",
+    "jotai": "^2.18.1",
     "react": "^19",
     "react-dom": "^19",
     "tailwindcss": "^4.2.1"

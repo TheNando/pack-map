@@ -1,27 +1,24 @@
+import { useAtom } from "jotai";
+import { filterTextAtom } from "../lib/utils";
+
 /**
  * A text input for filtering import map entries.
- *
- * @param filterText - The current filter text.
- * @param onFilterTextChange - The callback to update the filter text.
  */
-export function ImportMapFilter({
-  filterText,
-  onFilterTextChange,
-}: {
-  filterText: string;
-  onFilterTextChange: (value: string) => void;
-}) {
+export function ImportMapFilter() {
+  const [filterText, setFilterText] = useAtom(filterTextAtom);
+
   return (
-    <label className="flex flex-col gap-2">
-      <span className="text-sm text-base-content/70">Filter entries</span>
+    <div className="mb-4">
+      <div className="text-sm text-base-content/70 mb-2">Filter</div>
+
       <input
         type="text"
         value={filterText}
-        onChange={(event) => onFilterTextChange(event.target.value)}
+        onChange={(event) => setFilterText(event.target.value)}
         placeholder="Filter by package, member, or file"
         className="input input-bordered input-sm w-full"
         aria-label="Filter import map entries"
       />
-    </label>
+    </div>
   );
 }

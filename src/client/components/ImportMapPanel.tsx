@@ -8,7 +8,6 @@ import { LoadingSpinner } from "./LoadingSpinner";
  * A panel that displays the import map result.
  */
 export function ImportMapPanel() {
-  const [selectedEntry, setSelectedEntry] = useState("");
   const { data, isLoading, isSuccess } = useQuery<AnalyzeResponse>({
     queryKey: ["analyze"],
     queryFn: async () => {
@@ -27,11 +26,7 @@ export function ImportMapPanel() {
       {isLoading ? <LoadingSpinner /> : null}
 
       {isSuccess && resultEntries.length > 0 ? (
-        <ImportMapTree
-          result={result}
-          selectedEntry={selectedEntry}
-          onSelectEntry={setSelectedEntry}
-        />
+        <ImportMapTree result={result} />
       ) : null}
 
       {isSuccess && resultEntries.length === 0 ? (

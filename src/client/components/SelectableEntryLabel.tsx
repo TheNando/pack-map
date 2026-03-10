@@ -1,4 +1,6 @@
+import { useSetAtom } from "jotai";
 import { type MouseEvent } from "react";
+import { selectedEntryAtom } from "../lib/utils";
 
 /**
  * A label that can be selected by clicking on it.
@@ -10,12 +12,12 @@ import { type MouseEvent } from "react";
 export function SelectableEntryLabel({
   entryName,
   label,
-  onSelect,
 }: {
   entryName: string;
   label: string;
-  onSelect: (entryName: string) => void;
 }) {
+  const setSelectedEntry = useSetAtom(selectedEntryAtom);
+
   const handleSelectPointerDown = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -24,7 +26,7 @@ export function SelectableEntryLabel({
   const handleSelect = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    onSelect(entryName);
+    setSelectedEntry(entryName);
   };
 
   return (

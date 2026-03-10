@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import type {
   AnalyzeResult,
   FilteredMemberEntry,
@@ -5,6 +6,11 @@ import type {
   SortDirection,
   SortKey,
 } from "./types";
+
+export const filterTextAtom = atom("");
+export const selectedEntryAtom = atom("");
+export const sortDirectionAtom = atom<SortDirection>("asc");
+export const sortKeyAtom = atom<SortKey>("name");
 
 export function filterResultEntries(
   result: AnalyzeResult,
