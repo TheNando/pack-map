@@ -8,9 +8,36 @@ import type {
 } from "./types";
 
 export const filterTextAtom = atom("");
+export const importMapAtom = atom<AnalyzeResult>({});
 export const selectedEntryAtom = atom("");
 export const sortDirectionAtom = atom<SortDirection>("asc");
 export const sortKeyAtom = atom<SortKey>("name");
+
+export function buildImportMapCsv(result: AnalyzeResult) {
+  const rows = [["Package", "Member", "File"]];
+
+  for (const [moduleName, members] of Object.entries(result).sort(([a], [b]) =>
+    a.localeCompare(b),
+  )) {
+    for (const [memberName, files] of Object.entries(members).sort(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
+      for (const filePath of getUniqueSortedFiles(files)) {
+        rows.push([moduleName, memberName, filePath]);
+      }
+    }
+  }
+
+  return rows.map((row) => row.map(escapeCsvValue).join(",")).join("\n");
+}
+
+function escapeCsvValue(value: string) {
+  if (!/[",\n\r]/.test(value)) {
+    return value;
+  }
+
+  return `"${value.replaceAll('"', '""')}"`;
+}
 
 export function filterResultEntries(
   result: AnalyzeResult,

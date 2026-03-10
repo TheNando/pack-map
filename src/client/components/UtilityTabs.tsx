@@ -2,11 +2,12 @@ import { atom, useAtom, useAtomValue } from "jotai";
 import { ImportMapFilter } from "./ImportMapFilter";
 import { ImportMapSort } from "./ImportMapSort";
 import { SelectionBar } from "./SelectionBar";
+import { ExportMap } from "./ExportMap";
 
 const tabContentStyles =
   "tab-content rounded-box bg-base-100 border-base-300 p-5";
 
-const activeTabAtom = atom(2);
+const activeTabAtom = atom(0);
 
 function Tab({ children, id }: { children: string; id: number }) {
   const [activeTab, setActiveTab] = useAtom(activeTabAtom);
@@ -48,7 +49,9 @@ export function UtilityTabs() {
 
       <Tab id={2}>Export</Tab>
       {activeTab === 2 && (
-        <section className={tabContentStyles}>Export</section>
+        <section className={tabContentStyles}>
+          <ExportMap />
+        </section>
       )}
     </div>
   );

@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import type { AnalyzeResponse } from "../lib/types";
 import { ImportMapTree } from "./ImportMapTree";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { useEffect } from "react";
+import { useSetAtom } from "jotai";
+import { importMapAtom } from "../lib/utils";
 
 /**
  * A panel that displays the import map result.
  */
 export function ImportMapPanel() {
+  const setImportMap = useSetAtom(importMapAtom);
+
   const { data, isLoading, isSuccess } = useQuery<AnalyzeResponse>({
     queryKey: ["analyze"],
     queryFn: async () => {
@@ -16,9 +20,13 @@ export function ImportMapPanel() {
     },
   });
 
-  const resultEntries = Object.entries(data?.result ?? {}).sort(([a], [b]) =>
-    a.localeCompare(b),
-  );
+  useEffect(() => {
+    if (isSuccess) {
+      setImportMap(data.result);
+    }
+  }, [data, isSuccess, setImportMap]);
+
+  const resultEntries = Object.entries(data?.result ?? {});
   const result = data?.result ?? {};
 
   return (
