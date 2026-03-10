@@ -7,7 +7,7 @@ import { ExportMap } from "./ExportMap";
 const tabContentStyles =
   "tab-content rounded-box bg-base-100 border-base-300 p-5";
 
-const activeTabAtom = atom(0);
+const activeTabAtom = atom(1);
 
 function Tab({ children, id }: { children: string; id: number }) {
   const [activeTab, setActiveTab] = useAtom(activeTabAtom);
@@ -33,10 +33,10 @@ export function UtilityTabs() {
 
   return (
     <div role="tablist" className="tabs tabs-border w-80">
-      <Tab id={0}>Config</Tab>
+      {/* <Tab id={0}>Config</Tab>
       {activeTab === 0 && (
         <section className={tabContentStyles}>Config</section>
-      )}
+      )} */}
 
       <Tab id={1}>Sort/Filter</Tab>
       {activeTab === 1 && (

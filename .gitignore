@@ -1,6 +1,9 @@
 # dependencies (bun install)
 node_modules
 
+# config
+config.json
+
 # output
 out
 dist

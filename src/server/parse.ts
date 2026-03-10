@@ -1,9 +1,19 @@
-export const TRACKED_IMPORTS = [
-  "@mui/lab",
-  "@mui/material",
-  "@mui/styles",
-  "@mui/x-date-pickers",
-];
+import { readFileSync } from "node:fs";
+
+type AppConfig = {
+  packages?: string[];
+};
+
+function getPackagesFromConfig() {
+  const configPath = new URL("../../config.json", import.meta.url);
+  const config = JSON.parse(readFileSync(configPath, "utf8")) as AppConfig;
+
+  if (!Array.isArray(config.packages) || config.packages.length === 0) {
+    throw new Error("No tracked imports configured in config.json");
+  }
+
+  return config.packages;
+}
 
 export type AnalyzeResult = Record<string, Record<string, string[]>>;
 
@@ -27,9 +37,10 @@ export function mapImports(
   let match;
 
   while ((match = IMPORT_REGEX.exec(content)) !== null) {
+    const packages = getPackagesFromConfig();
     const moduleName = match[3];
 
-    if (!moduleName || !TRACKED_IMPORTS.includes(moduleName)) {
+    if (!moduleName || !packages.includes(moduleName)) {
       continue;
     }
 

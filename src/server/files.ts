@@ -1,41 +1,45 @@
 import { readdir } from "node:fs/promises";
-import { normalize, parse } from "node:path";
-import { parseArgs } from "util";
+import { join, normalize } from "node:path";
 
-const { values } = parseArgs({
-  args: Bun.argv,
-  options: {
-    src: {
-      type: "string",
-    },
-  },
-  strict: true,
-  allowPositionals: true,
-});
+type AppConfig = {
+  src?: string[];
+};
 
 const isTypeScriptFile = (file: string) => {
   return file.endsWith(".ts") || file.endsWith(".tsx");
 };
 
-export async function getTypeScriptFilesInDirectory() {
-  const path = parse(Bun.main);
+async function getSourceDirectoriesFromConfig() {
+  const configFile = Bun.file(new URL("../../config.json", import.meta.url));
+  const config = (await configFile.json()) as AppConfig;
 
-  if (!values.src) {
-    throw new Error("No source file provided");
+  if (!Array.isArray(config.src) || config.src.length === 0) {
+    throw new Error("No source directories configured in config.json");
   }
 
-  try {
-    const basePath = normalize(`${path.dir}/../${values.src}`);
-    const files = await readdir(basePath, {
-      recursive: true,
-    });
+  return config.src;
+}
 
-    const tsFiles = files
-      .filter(isTypeScriptFile)
-      .map((file) => `${basePath}/${file}`);
+export async function getTypeScriptFiles() {
+  const directories = await getSourceDirectoriesFromConfig();
 
-    return tsFiles;
-  } catch (error) {
-    throw new Error(`Error resolving path: ${error}`);
-  }
+  const fileGroups = await Promise.all(
+    directories.map(async (directory) => {
+      const basePath = normalize(directory);
+
+      try {
+        const files = await readdir(basePath, {
+          recursive: true,
+        });
+
+        return files
+          .filter(isTypeScriptFile)
+          .map((file) => join(basePath, file));
+      } catch (error) {
+        throw new Error(`Error resolving path ${basePath}: ${error}`);
+      }
+    }),
+  );
+
+  return [...new Set(fileGroups.flat())];
 }
