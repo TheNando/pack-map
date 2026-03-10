@@ -2,38 +2,15 @@
 
 Pack Map is a small Bun + React application for analyzing package imports in a TypeScript codebase and presenting the results as an interactive import map.
 
-Today, it is focused on tracking Material UI imports and showing:
-
-- which tracked packages are used
-- which named members are imported from each package
-- which files reference each member
-- a selectable value bar for quickly copying a package, member, or file path
-
 ## What it does
 
-When Pack Map starts, it scans a source directory for `.ts` and `.tsx` files, extracts imports from a configured list of packages, and exposes the results in a browser UI.
-
-The current tracked packages are:
-
-- `@mui/lab`
-- `@mui/material`
-- `@mui/styles`
-- `@mui/x-date-pickers`
+When Pack Map starts, it scans every directory listed in the root `config.json` `src` array for `.ts` and `.tsx` files, extracts imports from the configured `packages` list, and exposes the results in a browser UI.
 
 The UI displays those imports as a nested tree:
 
 1. package
 2. imported member
 3. files that reference that member
-
-## Features
-
-- recursive TypeScript/TSX source scanning
-- grouped import map by package and imported member
-- sorted, de-duplicated file listings
-- interactive tree view for exploring import usage
-- click-to-select entries with copy support
-- loading and empty states in the import map panel
 
 ## Getting started
 
@@ -43,10 +20,24 @@ Install dependencies:
 bun install
 ```
 
-Run the development server and point it at the source directory you want to analyze:
+Pack Map is configured through the root `config.json` file.
+
+- `src`: an array of directories to scan recursively for `.ts` and `.tsx` files
+- `packages`: an array of package names to include in the import analysis
+
+Copy the `config.example.json` to `config.json`. Edit `config.json` it with the source directories and packages you want to analyze. Example:
+
+```json
+{
+  "src": ["./src"],
+  "packages": ["react", "jotai", "@tanstack/react-query"]
+}
+```
+
+Then run the development server:
 
 ```bash
-bun run dev --src ../path-to-your-project/src
+bun run dev
 ```
 
 Then open the local URL printed by Bun in your terminal.
@@ -56,7 +47,7 @@ Then open the local URL printed by Bun in your terminal.
 Start the app in production mode:
 
 ```bash
-bun run start --src ../path-to-your-project/src
+bun run start
 ```
 
 ## Build
@@ -66,23 +57,6 @@ Create a production build:
 ```bash
 bun run build
 ```
-
-## How it works
-
-- The server scans the provided source directory for `.ts` and `.tsx` files.
-- Import statements are parsed and filtered to a configured allowlist of packages.
-- The analyzed import map is served from `/api/analyze`.
-- The React client fetches that data and renders it as an interactive tree.
-
-## Configuration
-
-If you want to track different packages, update the `TRACKED_IMPORTS` array in `src/server/parse.ts`.
-
-## Notes and limitations
-
-- The app currently analyzes only TypeScript and TSX files.
-- Import parsing is based on pattern matching and currently focuses on supported static import forms.
-- The import map is generated when the server starts and served from that analyzed snapshot.
 
 ## Tech stack
 
