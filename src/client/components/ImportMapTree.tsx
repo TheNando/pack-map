@@ -1,7 +1,10 @@
-import type { AnalyzeResult } from "../lib/types";
-import { formatFolderLabel, getUniqueSortedFiles } from "../lib/utils";
+import { useMemo, useState } from "react";
+import type { AnalyzeResult, SortDirection, SortKey } from "../lib/types";
+import { filterResultEntries, formatFolderLabel } from "../lib/utils";
 import { EntrySummary } from "./EntrySummary";
 import { FileList } from "./FileList";
+import { ImportMapFilter } from "./ImportMapFilter";
+import { ImportMapSort } from "./ImportMapSort";
 import { SelectionBar } from "./SelectionBar";
 
 /**
@@ -20,13 +23,39 @@ export function ImportMapTree({
   selectedEntry: string;
   onSelectEntry: (entryName: string) => void;
 }) {
-  const resultEntries = Object.entries(result).sort(([a], [b]) =>
-    a.localeCompare(b),
+  const [filterText, setFilterText] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  const handleSortChange = (nextSortKey: SortKey) => {
+    if (nextSortKey === sortKey) {
+      setSortDirection((currentDirection) =>
+        currentDirection === "asc" ? "desc" : "asc",
+      );
+      return;
+    }
+
+    setSortKey(nextSortKey);
+    setSortDirection("asc");
+  };
+
+  const resultEntries = useMemo(
+    () => filterResultEntries(result, filterText, sortKey, sortDirection),
+    [filterText, result, sortDirection, sortKey],
   );
 
   return (
     <div className="flex flex-col gap-3">
       <SelectionBar selectedEntry={selectedEntry} />
+      <ImportMapFilter
+        filterText={filterText}
+        onFilterTextChange={setFilterText}
+      />
+      <ImportMapSort
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        onSortChange={handleSortChange}
+      />
       <ul className="menu menu-xs w-full rounded-box bg-base-200">
         {resultEntries.map(([moduleName, members]) => (
           <li key={moduleName}>
@@ -35,32 +64,24 @@ export function ImportMapTree({
                 type="package"
                 className="font-medium"
                 entryName={moduleName}
-                label={formatFolderLabel(
-                  moduleName,
-                  Object.keys(members).length,
-                )}
+                label={formatFolderLabel(moduleName, members.length)}
                 onSelect={onSelectEntry}
               />
               <ul>
-                {Object.entries(members)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([memberName, files]) => (
-                    <li key={`${moduleName}-${memberName}`}>
-                      <details>
-                        <EntrySummary
-                          type="folder"
-                          className=""
-                          entryName={memberName}
-                          label={formatFolderLabel(
-                            memberName,
-                            getUniqueSortedFiles(files).length,
-                          )}
-                          onSelect={onSelectEntry}
-                        />
-                        <FileList files={files} onSelect={onSelectEntry} />
-                      </details>
-                    </li>
-                  ))}
+                {members.map(([memberName, files]) => (
+                  <li key={`${moduleName}-${memberName}`}>
+                    <details>
+                      <EntrySummary
+                        type="folder"
+                        className=""
+                        entryName={memberName}
+                        label={formatFolderLabel(memberName, files.length)}
+                        onSelect={onSelectEntry}
+                      />
+                      <FileList files={files} onSelect={onSelectEntry} />
+                    </details>
+                  </li>
+                ))}
               </ul>
             </details>
           </li>
