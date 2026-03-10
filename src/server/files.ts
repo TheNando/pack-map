@@ -3,13 +3,26 @@ import { join, normalize } from "node:path";
 
 type AppConfig = {
   src?: string[];
+  exclude?: string[];
 };
 
 const isTypeScriptFile = (file: string) => {
   return file.endsWith(".ts") || file.endsWith(".tsx");
 };
 
-async function getSourceDirectoriesFromConfig() {
+const normalizeForComparison = (value: string) => {
+  return normalize(value).replaceAll("\\", "/");
+};
+
+export function isExcludedFile(filePath: string, excludePatterns: string[]) {
+  const normalizedFilePath = normalizeForComparison(filePath);
+
+  return excludePatterns.some((pattern) =>
+    normalizedFilePath.includes(normalizeForComparison(pattern)),
+  );
+}
+
+async function getFileScanConfig() {
   const configFile = Bun.file(new URL("../../config.json", import.meta.url));
   const config = (await configFile.json()) as AppConfig;
 
@@ -17,11 +30,14 @@ async function getSourceDirectoriesFromConfig() {
     throw new Error("No source directories configured in config.json");
   }
 
-  return config.src;
+  return {
+    src: config.src,
+    exclude: Array.isArray(config.exclude) ? config.exclude : [],
+  };
 }
 
 export async function getTypeScriptFiles() {
-  const directories = await getSourceDirectoriesFromConfig();
+  const { src: directories, exclude } = await getFileScanConfig();
 
   const fileGroups = await Promise.all(
     directories.map(async (directory) => {
@@ -33,8 +49,11 @@ export async function getTypeScriptFiles() {
         });
 
         return files
-          .filter(isTypeScriptFile)
-          .map((file) => join(basePath, file));
+          .map((file) => join(basePath, file))
+          .filter(
+            (filePath) =>
+              isTypeScriptFile(filePath) && !isExcludedFile(filePath, exclude),
+          );
       } catch (error) {
         throw new Error(`Error resolving path ${basePath}: ${error}`);
       }

@@ -2,7 +2,10 @@
   "src": [
     "./src"
   ],
-  "trackedImports": [
+  "exclude": [
+    "/node_modules/"
+  ],
+  "packages": [
     "@tanstack/react-query",
     "jotai",
     "react"
