@@ -1,6 +1,9 @@
 // @ts-expect-error - Bun handles this fine even though TS language server doesn't like it
 import logo from "../assets/package-search.png";
 
+/**
+ * The hero section of the app.
+ */
 export function Hero() {
   return (
     <>

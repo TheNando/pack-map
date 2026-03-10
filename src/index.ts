@@ -2,6 +2,8 @@ import { serve } from "bun";
 import client from "./client/index.html";
 import { analyze } from "./server/analyze";
 
+const importMap = await analyze();
+
 const server = serve({
   routes: {
     // Serve index.html for all unmatched routes.
@@ -9,30 +11,8 @@ const server = serve({
 
     "/api/analyze": {
       async GET(req) {
-        return Response.json({ result: analyze() });
+        return Response.json({ result: importMap });
       },
-    },
-
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
-
-    "/api/hello/:name": async (req) => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
     },
   },
 

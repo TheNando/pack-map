@@ -1,16 +1,17 @@
-import { parseArgs } from "util";
+import { mapImports } from "./parse";
+import { getTypeScriptFilesInDirectory } from "./files";
 
-const { values, positionals } = parseArgs({
-  args: Bun.argv,
-  options: {
-    src: {
-      type: "string",
-    },
-  },
-  strict: true,
-  allowPositionals: true,
-});
+/** Analyze the list TypeScript files for imports */
+export async function analyze() {
+  const files = await getTypeScriptFilesInDirectory();
+  const importMap: Record<string, Record<string, string[]>> = {};
 
-export function analyze() {
-  return `${Bun.main}/${values.src}`;
+  for (const filename of files) {
+    const file = Bun.file(filename);
+    const content = await file.text();
+
+    mapImports(content, filename, importMap);
+  }
+
+  return importMap;
 }
